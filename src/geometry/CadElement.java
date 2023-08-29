@@ -7,7 +7,6 @@ import java.awt.geom.AffineTransform;
 import java.io.Serializable;
 
 public interface CadElement extends Serializable {
-    void setId(String id);
     String getId();
     void setName(String name);
     String getName();

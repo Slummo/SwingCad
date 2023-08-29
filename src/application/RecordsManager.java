@@ -2,17 +2,16 @@ package application;
 
 import geometry.CadElement;
 import gui.dialogs.EditElementDialog;
+import gui.dialogs.SimpleDialogCreator;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class RecordsManager {
     private static ArrayList<CadElement> list;
@@ -50,13 +49,13 @@ public class RecordsManager {
                 int row = table.rowAtPoint(e.getPoint());
                 if (e.getClickCount() == 2) {
                     String id = (String) model.getValueAt(row, 0);
-                    new EditElementDialog(null, "Edit record", getElementWithId(id));
+                    new EditElementDialog(null, "Edit record", getRecordWithId(id));
                 }
             }
         });
     }
 
-    public static CadElement getElementWithId(String id) {
+    public static CadElement getRecordWithId(String id) {
         id = id.toUpperCase();
         for(CadElement element : list) {
             if(element.getId().equals(id))
@@ -87,54 +86,97 @@ public class RecordsManager {
 
     public static void addRecord(CadElement record, boolean showDialog) {
         if(list.contains(record)) {
-            JOptionPane.showMessageDialog(null, "Record already exists!", "Info", JOptionPane.INFORMATION_MESSAGE);
+            SimpleDialogCreator.showInfoDialog(null, "Record already exists!");
             return;
         }
         list.add(record);
         model.addRow(record.getData());
         MainFrame.drawPanel.repaint();
         if(showDialog)
-            JOptionPane.showMessageDialog(null, "Record added!", "Info", JOptionPane.INFORMATION_MESSAGE);
+            SimpleDialogCreator.showInfoDialog(null, "Record added!");
     }
 
     public static void addRecords(ArrayList<CadElement> elements) {
         for(CadElement el : elements) {
             addRecord(el, false);
         }
+
+        SimpleDialogCreator.showInfoDialog(null, "Records added!");
     }
 
     public static void editRecord(CadElement newRecord) {
+        if(!SimpleDialogCreator.showConfirmDialog(null)) return;
+
         int index = getIndexFromId(newRecord.getId());
         list.set(index, newRecord);
         model.removeRow(index);
         model.insertRow(index, newRecord.getData());
         MainFrame.drawPanel.repaint();
-        JOptionPane.showMessageDialog(null, "Record edited!", "Info", JOptionPane.INFORMATION_MESSAGE);
+        SimpleDialogCreator.showInfoDialog(null, "Record edited!");
     }
 
-    public static void removeRecord(CadElement record) {
+    public static void removeRecord(CadElement record, boolean showDialog) {
         if(!list.contains(record)) {
-            JOptionPane.showMessageDialog(null, "Record doesn't exist!", "Error", JOptionPane.ERROR_MESSAGE);
+            SimpleDialogCreator.showErrorDialog(null, "Record doesn't exist!");
             return;
         }
+
         list.remove(record);
         model.setRowCount(0);
         for (CadElement r : list) {
             model.addRow(r.getData());
         }
         MainFrame.drawPanel.repaint();
-        JOptionPane.showMessageDialog(null, "Record removed!", "Info", JOptionPane.INFORMATION_MESSAGE);
+        if(showDialog)
+            SimpleDialogCreator.showInfoDialog(null, "Record removed!");
     }
 
     public static void removeRecord(String id) {
         id = id.toUpperCase();
         for(CadElement c : list) {
             if(c.getId().equals(id)) {
-                removeRecord(c);
+                removeRecord(c, true);
                 return;
             }
         }
-        JOptionPane.showMessageDialog(null, "Record doesn't exist!", "Error", JOptionPane.ERROR_MESSAGE);
+        SimpleDialogCreator.showErrorDialog(null, "Record doesn't exist!");
+    }
+
+    public static void clearRecords() {
+        if (list.isEmpty()) {
+            SimpleDialogCreator.showInfoDialog(null, "No records to clear!");
+            return;
+        }
+
+        if (!SimpleDialogCreator.showConfirmDialog(null)) return;
+
+        while (!list.isEmpty()) {
+            CadElement c = list.get(0);
+            removeRecord(c, false);
+        }
+
+        SimpleDialogCreator.showInfoDialog(null, "Records cleared!");
+    }
+
+    public static void saveRecordsToFile() {
+        if(list.isEmpty()) {
+            SimpleDialogCreator.showInfoDialog(null, "No records to save!");
+            return;
+        }
+        JFileChooser fileChooser = new JFileChooser(System.getProperty("user.dir"));
+        fileChooser.setSelectedFile(FileManager.getCustomFile(null, "serialized", "ser"));
+        int value = fileChooser.showSaveDialog(null);
+        if(value == JFileChooser.APPROVE_OPTION) {
+            File f = fileChooser.getSelectedFile();
+            FileManager.serializeObjToFile(
+                    RecordsManager.getList(),
+                    f
+            );
+        }
+
+
+
+        SimpleDialogCreator.showInfoDialog(null, "Records saved!");
     }
 
     private static int getIndexFromId(String id) {

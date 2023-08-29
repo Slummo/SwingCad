@@ -8,7 +8,7 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 
 public class CadSegment extends Line2D.Double implements CadElement {
-    private String id;
+    private final String id;
     private String name;
     private Color color;
     private Dimension translation;
@@ -33,11 +33,6 @@ public class CadSegment extends Line2D.Double implements CadElement {
 
     public CadSegment(String x1, String y1, String x2, String y2) {
         this(java.lang.Double.parseDouble(x1), java.lang.Double.parseDouble(y1), java.lang.Double.parseDouble(x2), java.lang.Double.parseDouble(y2));
-    }
-
-    @Override
-    public void setId(String id) {
-        this.id = id;
     }
 
     @Override

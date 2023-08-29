@@ -1,5 +1,6 @@
 package application;
 
+import geometry.CadElement;
 import geometry.figures.CadEllipse;
 import geometry.figures.CadRectangle;
 import geometry.primitives.CadPoint;
@@ -7,11 +8,13 @@ import geometry.primitives.CadPolygon;
 import geometry.primitives.CadPolyline;
 import geometry.primitives.CadSegment;
 import gui.dialogs.EditElementDialog;
+import gui.dialogs.SimpleDialogCreator;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.File;
 import java.util.ArrayList;
 
 public class Terminal extends JTextField {
@@ -30,6 +33,9 @@ public class Terminal extends JTextField {
         availableCommands.add("add");
         availableCommands.add("edit");
         availableCommands.add("remove");
+        availableCommands.add("clear");
+        availableCommands.add("save");
+        availableCommands.add("open");
         availableCommands.add("help");
 
         addKeyListener(new KeyAdapter() {
@@ -54,24 +60,14 @@ public class Terminal extends JTextField {
         switch(command) {
             case "add" -> {
                 if(args.length == 1) {
-                    JOptionPane.showMessageDialog(
-                            mainFrame,
-                            "Too few arguments! add <shape> [coordinates]",
-                            "Error",
-                            JOptionPane.ERROR_MESSAGE
-                    );
+                    SimpleDialogCreator.showErrorDialog(mainFrame, "Too few arguments! add <shape> [coordinates]");
                     return;
                 }
 
                 switch (args[1]) {
                     case "point" -> {
                         if (args.length != 4) {
-                            JOptionPane.showMessageDialog(
-                                    mainFrame,
-                                    "Too many or too few arguments! add point <x> <y>",
-                                    "Error",
-                                    JOptionPane.ERROR_MESSAGE
-                            );
+                            SimpleDialogCreator.showErrorDialog(mainFrame, "Too many or too few arguments! add point <x> <y>");
                             return;
                         }
 
@@ -79,12 +75,7 @@ public class Terminal extends JTextField {
                     }
                     case "segment" -> {
                         if (args.length != 6) {
-                            JOptionPane.showMessageDialog(
-                                    mainFrame,
-                                    "Too many or too few arguments! add segment <x1> <y1> <x2> <y2>",
-                                    "Error",
-                                    JOptionPane.ERROR_MESSAGE
-                            );
+                            SimpleDialogCreator.showErrorDialog(mainFrame, "Too many or too few arguments! add segment <x1> <y1> <x2> <y2>");
                             return;
                         }
 
@@ -92,12 +83,7 @@ public class Terminal extends JTextField {
                     }
                     case "polyline" -> {
                         if (args.length < 4) {
-                            JOptionPane.showMessageDialog(
-                                    mainFrame,
-                                    "Too few arguments! add polyline <x1> <y1>...",
-                                    "Error",
-                                    JOptionPane.ERROR_MESSAGE
-                            );
+                            SimpleDialogCreator.showErrorDialog(mainFrame, "Too few arguments! add polyline <x1> <y1>...");
                             return;
                         }
 
@@ -111,12 +97,7 @@ public class Terminal extends JTextField {
                     case "polygon" -> {
                         //Not even a triangle
                         if(args.length < 8) {
-                            JOptionPane.showMessageDialog(
-                                    mainFrame,
-                                    "Too few arguments! add polygon <x1> <y1> <x2> <y2> <x3> <y3>...",
-                                    "Error",
-                                    JOptionPane.ERROR_MESSAGE
-                            );
+                            SimpleDialogCreator.showErrorDialog(mainFrame, "Too few arguments! add polygon <x1> <y1> <x2> <y2> <x3> <y3>...");
                             return;
                         }
 
@@ -129,12 +110,7 @@ public class Terminal extends JTextField {
                     }
                     case "rectangle" -> {
                         if (args.length != 6) {
-                            JOptionPane.showMessageDialog(
-                                    mainFrame,
-                                    "Too many or too few arguments! add rectangle <upperLeftCornerX> <upperLeftCornerY> <width> <height>",
-                                    "Error",
-                                    JOptionPane.ERROR_MESSAGE
-                            );
+                            SimpleDialogCreator.showErrorDialog(mainFrame, "Too many or too few arguments! add rectangle <upperLeftCornerX> <upperLeftCornerY> <width> <height>");
                             return;
                         }
 
@@ -142,62 +118,45 @@ public class Terminal extends JTextField {
                     }
                     case "ellipse" -> {
                         if (args.length != 6) {
-                            JOptionPane.showMessageDialog(
-                                    mainFrame,
-                                    "Too many or too few arguments! add ellipse <upperLeftCornerX> <upperLeftCornerY> <width> <height>",
-                                    "Error",
-                                    JOptionPane.ERROR_MESSAGE
-                            );
+                            SimpleDialogCreator.showErrorDialog(mainFrame, "Too many or too few arguments! add ellipse <upperLeftCornerX> <upperLeftCornerY> <width> <height>");
                             return;
                         }
 
                         RecordsManager.addRecord(new CadEllipse(args[2], args[3], args[4], args[5]), true);
                     }
-                    default -> JOptionPane.showMessageDialog(
-                            mainFrame,
-                            "Not a valid shape",
-                            "Error",
-                            JOptionPane.ERROR_MESSAGE
-                    );
+                    default -> SimpleDialogCreator.showErrorDialog(mainFrame, "Not a valid shape");
                 }
             }
-            case "help" -> JOptionPane.showMessageDialog(
-                    mainFrame,
-                    availableCommands,
-                    "Available commands",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
+            case "save" -> RecordsManager.saveRecordsToFile();
+            case "open" -> {
+                JFileChooser fileChooser = new JFileChooser(System.getProperty("user.dir"));
+                int value = fileChooser.showOpenDialog(mainFrame);
+                File f = null;
+                if(value == JFileChooser.APPROVE_OPTION)
+                    f = fileChooser.getSelectedFile();
+
+                ArrayList<CadElement> elements = (ArrayList<CadElement>) FileManager.deserializeObjectFromFile(f);
+                RecordsManager.addRecords(elements);
+            }
             case "edit" -> {
                 if(args.length != 2) {
-                    JOptionPane.showMessageDialog(
-                            mainFrame,
-                            "Too many or too few arguments! remove <index>",
-                            "Error",
-                            JOptionPane.ERROR_MESSAGE
-                    );
+                    SimpleDialogCreator.showErrorDialog(mainFrame, "Too many or too few arguments! edit <index>");
                     return;
                 }
 
-                new EditElementDialog(mainFrame, "Edit", RecordsManager.getElementWithId(args[1]));
+                new EditElementDialog(mainFrame, "Edit", RecordsManager.getRecordWithId(args[1]));
             }
             case "remove" -> {
                 if(args.length != 2) {
-                    JOptionPane.showMessageDialog(
-                            mainFrame,
-                            "Too many or too few arguments! remove <index>",
-                            "Error",
-                            JOptionPane.ERROR_MESSAGE
-                    );
+                    SimpleDialogCreator.showErrorDialog(mainFrame, "Too many or too few arguments! remove <index>");
                     return;
                 }
+                if(!SimpleDialogCreator.showConfirmDialog(null)) return;
                 RecordsManager.removeRecord(args[1]);
             }
-            default -> JOptionPane.showMessageDialog(
-                    null,
-                    "Not a valid command",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
+            case "clear" -> RecordsManager.clearRecords();
+            case "help" -> SimpleDialogCreator.showInfoDialog(mainFrame, "Available commands");
+            default -> SimpleDialogCreator.showErrorDialog(mainFrame, "Not a valid command");
         }
     }
 }

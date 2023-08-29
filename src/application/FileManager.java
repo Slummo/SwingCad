@@ -56,11 +56,16 @@ public class FileManager {
         panel.paint(g2d);
         g2d.dispose();
 
-        File file = new File("img/cad-swing-view_" + UUID.randomUUID().toString().substring(0, 3) + extension);
+        File file = getCustomFile("img", "cad-swing-view", extension);
         try {
             ImageIO.write(bufferedImage, "png", file);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static File getCustomFile(String path, String name, String extension) {
+        if(path != null) return new File(path + "/" + name + "_" + UUID.randomUUID().toString().substring(0, 3) + "." + extension);
+        else return new File(name + "_" + UUID.randomUUID().toString().substring(0, 3) + "." + extension);
     }
 }

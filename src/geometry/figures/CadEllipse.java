@@ -2,12 +2,13 @@ package geometry.figures;
 
 import application.RecordsManager;
 import geometry.CadElement;
+import geometry.primitives.CadPoint;
 
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
 
 public class CadEllipse extends Ellipse2D.Double implements CadElement {
-    private String id;
+    private final String id;
     private String name;
     private Color color;
     private Dimension translation;
@@ -30,9 +31,12 @@ public class CadEllipse extends Ellipse2D.Double implements CadElement {
         this(java.lang.Double.parseDouble(x), java.lang.Double.parseDouble(y), java.lang.Double.parseDouble(w), java.lang.Double.parseDouble(h));
     }
 
-    @Override
-    public void setId(String id) {
-        this.id = id;
+    public CadEllipse(CadPoint p1, CadPoint p2) {
+        this(p1.x, p1.y, p1.distance(p2), p1.distance(p2));
+    }
+
+    public CadEllipse(CadPoint p1, CadPoint p2, CadPoint p3) {
+        this(p1.x, p1.y, p1.distance(p2), p1.distance(p3));
     }
 
     @Override

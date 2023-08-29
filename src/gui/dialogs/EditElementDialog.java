@@ -1,8 +1,11 @@
 package gui.dialogs;
 
 import application.ColorsManager;
+import application.ExceptionManager;
+import application.MainFrame;
 import application.RecordsManager;
 import geometry.CadElement;
+import geometry.primitives.CadPoint;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,9 +24,9 @@ public class EditElementDialog extends EditableDialog {
     protected void setupPanel() {
         String[] data = el.getData();
         JTextField fId = new JTextField(data[0]);
-        fId.setEnabled(false);
+        fId.setEditable(false);
         JTextField fName = new JTextField(data[1]);
-        fName.setEnabled(false);
+        fName.setEditable(false);
         JComboBox<String> comboBoxColor = new JComboBox<>(new String[] {
                 ColorsManager.getStringFromColor(ColorsManager.BLACK),
                 ColorsManager.getStringFromColor(ColorsManager.WHITE),
@@ -42,10 +45,39 @@ public class EditElementDialog extends EditableDialog {
         comboBoxDraw.setSelectedItem(data[6]);
         JButton btnRemove = new JButton("Remove");
         btnRemove.addActionListener(e -> {
-            setRecordAction(() -> RecordsManager.removeRecord(el));
+            setRecordAction(() -> {
+                if(!SimpleDialogCreator.showConfirmDialog(null)) return;
+                RecordsManager.removeRecord(el, true);
+            });
             runRecordAction();
             setRecordAction(() -> RecordsManager.editRecord(el));
             dispose();
+        });
+        JButton btnGoto = new JButton("Go to");
+        btnGoto.addActionListener(e -> {
+            ExceptionManager.tryAndCatch(
+                    this,
+                    () -> {
+                        CadElement element = RecordsManager.getRecordWithId(fId.getText());
+                        Dimension newOffset = new Dimension();
+                        if(element instanceof CadPoint p) {
+                            newOffset = new Dimension((int) p.x, (int) p.y);
+                        } else if(element instanceof Shape s) {
+                            newOffset = new Dimension((int) s.getBounds().getCenterX(), (int) s.getBounds().getCenterY());
+                        }
+                        MainFrame.drawPanel.setOffset(newOffset);
+                    },
+                    this::cleanTextFields,
+                    "Invalid input. Please enter valid numbers."
+            );
+        });
+        JButton btnReset = new JButton("Reset");
+        btnReset.addActionListener(e -> {
+            comboBoxColor.setSelectedItem(data[2]);
+            fTrans.setText(data[3]);
+            fRot.setText(data[4]);
+            fScale.setText(data[5]);
+            comboBoxDraw.setSelectedItem(data[6]);
         });
         JButton btnSave = new JButton("Save");
         btnSave.addActionListener(e -> {
@@ -59,14 +91,7 @@ public class EditElementDialog extends EditableDialog {
             runRecordAction();
             dispose();
         });
-        JButton btnCancel = new JButton("Cancel");
-        btnCancel.addActionListener(e -> {
-            comboBoxColor.setSelectedItem(data[2]);
-            fTrans.setText(data[3]);
-            fRot.setText(data[4]);
-            fScale.setText(data[5]);
-            comboBoxDraw.setSelectedItem(data[6]);
-        });
+
 
         addComponent(new JLabel("Id"), 0, 0, false);
         addComponent(fId, 1, 0, false);
@@ -83,8 +108,9 @@ public class EditElementDialog extends EditableDialog {
         addComponent(new JLabel("Draw"), 6, 1, false);
         addComponent(comboBoxDraw, 7, 1, false);
         addComponent(btnRemove, 0, 2, false);
-        addComponent(btnCancel, 1, 2, false);
-        addComponent(btnSave, 2, 2, false);
+        addComponent(btnGoto, 1, 2, false);
+        addComponent(btnReset, 6, 2, false);
+        addComponent(btnSave, 7, 2, false);
     }
 
     @Override

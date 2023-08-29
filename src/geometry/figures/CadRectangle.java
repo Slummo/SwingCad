@@ -3,12 +3,13 @@ package geometry.figures;
 
 import application.RecordsManager;
 import geometry.CadElement;
+import geometry.primitives.CadPoint;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 
 public class CadRectangle extends Rectangle2D.Double implements CadElement {
-    private String id;
+    private final String id;
     private String name;
     private Color color;
     private Dimension translation;
@@ -31,9 +32,19 @@ public class CadRectangle extends Rectangle2D.Double implements CadElement {
         this(java.lang.Double.parseDouble(x), java.lang.Double.parseDouble(y), java.lang.Double.parseDouble(w), java.lang.Double.parseDouble(h));
     }
 
-    @Override
-    public void setId(String id) {
-        this.id = id;
+    public CadRectangle(CadPoint p1, CadPoint p2) {
+        this(p1.x, p1.y, p1.distance(p2), p1.distance(p2));
+    }
+
+    public CadRectangle(CadPoint p1, CadPoint p2, CadPoint p3) {
+        this(p1.x, p1.y, p1.distance(p2), p1.distance(p3));
+    }
+
+    private static int[] getValues(CadPoint p1, CadPoint p2, CadPoint p3) {
+        int width = (int) (2 * Math.abs(p2.x - p1.x));
+        int height = (int) (2 * Math.abs(p3.y - p1.y));
+
+        return new int[] {(int) p1.x, (int) p1.y, width, height};
     }
 
     @Override

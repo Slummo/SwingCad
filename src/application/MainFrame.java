@@ -34,7 +34,7 @@ public class MainFrame extends JFrame {
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
         add(scrollPane, BorderLayout.SOUTH);
 
-        setJMenuBar(new MenuBar(this));
+        setJMenuBar(new MenuBar(this, drawPanel));
     }
 
     public static void main(String[] args) {

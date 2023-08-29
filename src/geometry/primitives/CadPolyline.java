@@ -9,7 +9,7 @@ import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 
 public class CadPolyline extends Path2D.Double implements CadElement {
-    private String id;
+    private final String id;
     private String name;
     private Color color;
     private Dimension translation;
@@ -76,11 +76,6 @@ public class CadPolyline extends Path2D.Double implements CadElement {
 
     public boolean hasPoints() {
         return hasPoints;
-    }
-
-    @Override
-    public void setId(String id) {
-        this.id = id;
     }
 
     @Override

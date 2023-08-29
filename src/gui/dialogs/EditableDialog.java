@@ -7,8 +7,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 public abstract class EditableDialog extends JDialog {
-    protected GridBagConstraints c;
-    protected JPanel panel;
+    protected final GridBagConstraints c;
+    protected final JPanel panel;
     protected Runnable recordAction;
     protected Runnable addAction;
     private final boolean initialVisibility;

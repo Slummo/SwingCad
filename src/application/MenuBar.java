@@ -3,28 +3,23 @@ package application;
 
 import geometry.CadElement;
 import gui.dialogs.AddElementDialog;
+import gui.dialogs.GoToDialog;
+import gui.dialogs.SimpleDialogCreator;
 
 import javax.swing.*;
 import java.io.File;
 import java.util.ArrayList;
 
 public class MenuBar extends JMenuBar {
-    public MenuBar(MainFrame mainFrame) {
+    private final ListenersManager listenersManager;
+
+    public MenuBar(MainFrame mainFrame, DrawPanel panel) {
+        listenersManager = new ListenersManager(panel);
+
         //FILE
         JMenu file = new JMenu("File");
         JMenuItem f_save = new JMenuItem("Save");
-        f_save.addActionListener(e -> {
-            FileManager.serializeObjToFile(
-                    RecordsManager.getList(),
-                    new File("serialized/records.ser")
-            );
-            JOptionPane.showMessageDialog(
-                    mainFrame,
-                    "Records saved!",
-                    "Info",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
-        });
+        f_save.addActionListener(e -> RecordsManager.saveRecordsToFile());
         JMenuItem f_open = new JMenuItem("Open");
         f_open.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser(System.getProperty("user.dir"));
@@ -35,12 +30,6 @@ public class MenuBar extends JMenuBar {
 
             ArrayList<CadElement> elements = (ArrayList<CadElement>) FileManager.deserializeObjectFromFile(f);
             RecordsManager.addRecords(elements);
-            JOptionPane.showMessageDialog(
-                    mainFrame,
-                    "Records added!",
-                    "Info",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
         });
         //TODO png, jpeg, pdf, gcode x stampanti 3D
 
@@ -50,27 +39,17 @@ public class MenuBar extends JMenuBar {
         png.addActionListener(e -> {
             FileManager.saveImageFromPanel(
                     MainFrame.drawPanel,
-                    ".png"
+                    "png"
             );
-            JOptionPane.showMessageDialog(
-                    mainFrame,
-                    "View saved as png!",
-                    "Info",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
+            SimpleDialogCreator.showInfoDialog(null, "View saved as png!");
         });
         JMenuItem jpeg = new JMenuItem("jpeg");
         jpeg.addActionListener(e -> {
             FileManager.saveImageFromPanel(
                     MainFrame.drawPanel,
-                    ".jpeg"
+                    "jpeg"
             );
-            JOptionPane.showMessageDialog(
-                    mainFrame,
-                    "View saved as jpeg!",
-                    "Info",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
+            SimpleDialogCreator.showInfoDialog(null, "View saved as jpeg!");
         });
 
         //TODO
@@ -81,10 +60,19 @@ public class MenuBar extends JMenuBar {
         f_exportAs.add(pdf);
         f_exportAs.add(gcode);
 
+        //Exit
+        JMenuItem f_exit = new JMenuItem("Exit");
+        f_exit.addActionListener(e -> {
+            if(SimpleDialogCreator.showConfirmDialog(mainFrame, "Save?")) RecordsManager.saveRecordsToFile();
+            System.exit(0);
+        });
+
         file.add(f_save);
         file.add(f_open);
         file.add(new JSeparator());
         file.add(f_exportAs);
+        file.add(new JSeparator());
+        file.add(f_exit);
 
         //TOOLS
         JMenu tools = new JMenu("Tools");
@@ -92,37 +80,85 @@ public class MenuBar extends JMenuBar {
         //Add element
         JMenu t_addElement = new JMenu("Add element");
 
+        JMenu typing = new JMenu("Dialog");
+
         //Point
         JMenuItem point = new JMenuItem("Add point");
         point.addActionListener(e -> new AddElementDialog(mainFrame, "Add new point", true, AddElementDialog.POINT));
-        t_addElement.add(point);
+        typing.add(point);
 
         //Segment
         JMenuItem segment = new JMenuItem("Add segment");
         segment.addActionListener(e -> new AddElementDialog(mainFrame, "Add new segment", true, AddElementDialog.SEGMENT));
-        t_addElement.add(segment);
+        typing.add(segment);
 
         //Polyline
         JMenuItem polyline = new JMenuItem("Add polyline");
         polyline.addActionListener(e -> new AddElementDialog(mainFrame, "Add new polyline", true, AddElementDialog.POLYLINE));
-        t_addElement.add(polyline);
+        typing.add(polyline);
 
         //Polygon
         JMenuItem polygon = new JMenuItem("Add polygon");
         polygon.addActionListener(e -> new AddElementDialog(mainFrame, "Add new polygon", true, AddElementDialog.POLYGON));
-        t_addElement.add(polygon);
+        typing.add(polygon);
 
         //Rectangle
-        JMenuItem t_rectangle = new JMenuItem("Add rectangle");
-        t_rectangle.addActionListener(e -> new AddElementDialog(mainFrame, "Add new rectangle", true, AddElementDialog.RECTANGLE));
-        t_addElement.add(t_rectangle);
+        JMenuItem rectangle = new JMenuItem("Add rectangle");
+        rectangle.addActionListener(e -> new AddElementDialog(mainFrame, "Add new rectangle", true, AddElementDialog.RECTANGLE));
+        typing.add(rectangle);
 
         //Ellipse
-        JMenuItem t_ellipse = new JMenuItem("Add ellipse");
-        t_ellipse.addActionListener(e -> new AddElementDialog(mainFrame, "Add new ellipse", true, AddElementDialog.ELLIPSE));
-        t_addElement.add(t_ellipse);
+        JMenuItem ellipse = new JMenuItem("Add ellipse");
+        ellipse.addActionListener(e -> new AddElementDialog(mainFrame, "Add new ellipse", true, AddElementDialog.ELLIPSE));
+        typing.add(ellipse);
+
+        JMenu mouse = new JMenu("Mouse clicks");
+
+        //Point
+        JMenuItem point2 = new JMenuItem("Add point");
+        point2.addActionListener(e -> listenersManager.addListenersFor(AddElementDialog.POINT));
+        mouse.add(point2);
+
+        //Segment
+        JMenuItem segment2 = new JMenuItem("Add segment");
+        segment2.addActionListener(e -> listenersManager.addListenersFor(AddElementDialog.SEGMENT));
+        mouse.add(segment2);
+
+        //Polyline
+        JMenuItem polyline2 = new JMenuItem("Add polyline");
+        polyline2.addActionListener(e -> listenersManager.addListenersFor(AddElementDialog.POLYLINE));
+        mouse.add(polyline2);
+
+        //Polygon
+        JMenuItem polygon2 = new JMenuItem("Add polygon");
+        polygon2.addActionListener(e -> listenersManager.addListenersFor(AddElementDialog.POLYGON));
+        mouse.add(polygon2);
+
+        //Rectangle
+        JMenuItem rectangle2 = new JMenuItem("Add rectangle");
+        rectangle2.addActionListener(e -> listenersManager.addListenersFor(AddElementDialog.RECTANGLE));
+        mouse.add(rectangle2);
+
+        //Ellipse
+        JMenuItem ellipse2 = new JMenuItem("Add ellipse");
+        ellipse2.addActionListener(e -> listenersManager.addListenersFor(AddElementDialog.ELLIPSE));
+        mouse.add(ellipse2);
+
+        t_addElement.add(typing);
+        t_addElement.add(mouse);
+
+        JMenuItem t_goto = new JMenu("Go to");
+        JMenuItem goCoords = new JMenuItem("Coordinates");
+        goCoords.addActionListener(e -> new GoToDialog(mainFrame, "Go to", true, GoToDialog.COORDINATES));
+        JMenuItem goElement = new JMenuItem("Element");
+        goElement.addActionListener(e -> new GoToDialog(mainFrame, "Go to", true, GoToDialog.ELEMENT));
+
+        t_goto.add(goCoords);
+        t_goto.add(goElement);
 
         tools.add(t_addElement);
+        tools.add(new JSeparator());
+        tools.add(t_goto);
 
         //RECORDS
         JMenu records = new JMenu("Records");
@@ -130,6 +166,10 @@ public class MenuBar extends JMenuBar {
         JMenuItem r_viewRecords = new JMenuItem("View records");
         r_viewRecords.addActionListener(e -> MainFrame.viewRecordsDialog.setVisible(true));
         records.add(r_viewRecords);
+
+        JMenuItem r_clearRecords = new JMenuItem("Clear records");
+        r_clearRecords.addActionListener(e -> RecordsManager.clearRecords());
+        records.add(r_clearRecords);
 
         add(file);
         add(tools);

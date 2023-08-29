@@ -7,7 +7,7 @@ import java.awt.*;
 import java.awt.geom.Point2D;
 
 public class CadPoint extends Point2D.Double implements CadElement {
-    private String id;
+    private final String id;
     private String name;
     private Color color;
     private Dimension translation;
@@ -30,6 +30,14 @@ public class CadPoint extends Point2D.Double implements CadElement {
         this(java.lang.Double.parseDouble(x), java.lang.Double.parseDouble(y));
     }
 
+    public CadPoint(Point p) {
+        this(p.x, p.y);
+    }
+
+    public CadPoint(Point p, Dimension offset) {
+        this(p.x - offset.width, p.y - offset.height);
+    }
+
     @Override
     public double getX() {
         return x;
@@ -44,11 +52,6 @@ public class CadPoint extends Point2D.Double implements CadElement {
     public void setLocation(double x, double y) {
         this.x = x;
         this.y = y;
-    }
-
-    @Override
-    public void setId(String id) {
-        this.id = id;
     }
 
     @Override

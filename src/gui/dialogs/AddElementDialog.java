@@ -1,5 +1,6 @@
 package gui.dialogs;
 
+import application.ExceptionManager;
 import application.MainFrame;
 import application.RecordsManager;
 import geometry.CadElement;
@@ -52,23 +53,21 @@ public class AddElementDialog extends EditableDialog {
     private void setForPoint() {
         JTextField fX = new JTextField(10);
         JTextField fY = new JTextField(10);
+
         addAction = () -> {
-            try {
-                el = new CadPoint(fX.getText(), fY.getText());
-                runRecordAction();
-            } catch(NumberFormatException ex) {
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Invalid input. Please enter valid numbers.",
-                        "Error", JOptionPane.ERROR_MESSAGE
-                );
-                cleanTextFields();
-            }
+            ExceptionManager.tryAndCatch(
+                    this,
+                    () -> {
+                        el = new CadPoint(fX.getText(), fY.getText());
+                        runRecordAction();
+                    },
+                    this::cleanTextFields,
+                    "Invalid input. Please enter valid numbers."
+            );
         };
         fY.addKeyListener(createEnterKeyListener());
         JButton btnAdd = new JButton("Add");
         btnAdd.addActionListener(e -> runAddAction());
-
         addComponent(new JLabel("X"), 0, 0, false);
         addComponent(fX, 1, 0, false);
         addComponent(new JLabel("Y"), 2, 0, false);
@@ -82,17 +81,15 @@ public class AddElementDialog extends EditableDialog {
         JTextField fX2 = new JTextField(10);
         JTextField fY2 = new JTextField(10);
         addAction = () -> {
-            try {
-                el = new CadSegment(fX1.getText(), fY1.getText(), fX2.getText(), fY2.getText());
-                runRecordAction();
-            } catch(NumberFormatException ex) {
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Invalid input. Please enter valid numbers.",
-                        "Error", JOptionPane.ERROR_MESSAGE
-                );
-                cleanTextFields();
-            }
+            ExceptionManager.tryAndCatch(
+                    this,
+                    () -> {
+                        el = new CadSegment(fX1.getText(), fY1.getText(), fX2.getText(), fY2.getText());
+                        runRecordAction();
+                    },
+                    this::cleanTextFields,
+                    "Invalid input. Please enter valid numbers."
+            );
         };
         fY2.addKeyListener(createEnterKeyListener());
         JButton btnAdd = new JButton("Add");
@@ -116,7 +113,7 @@ public class AddElementDialog extends EditableDialog {
         btnUndo.addActionListener(e -> {
             ((CadPolyline) el).removePoint(lastPoint);
             setLastPoint(null, btnUndo);
-            JOptionPane.showMessageDialog(null, "Last point removed!", "Info", JOptionPane.INFORMATION_MESSAGE);
+            SimpleDialogCreator.showInfoDialog(null, "Last point removed");
         });
         btnAddPoints.addActionListener(e -> {
             AddElementDialog d = new AddElementDialog(this, "Add points", true, AddElementDialog.POINT);
@@ -129,7 +126,7 @@ public class AddElementDialog extends EditableDialog {
                     runRecordAction();
                 }
                 ((CadPolyline) el).addPoint(lastPoint, false);
-                JOptionPane.showMessageDialog(null, "Point added!", "Info", JOptionPane.INFORMATION_MESSAGE);
+                SimpleDialogCreator.showInfoDialog(null, "Point added!");
             });
         });
 
@@ -145,7 +142,7 @@ public class AddElementDialog extends EditableDialog {
         btnUndo.addActionListener(e -> {
             ((CadPolygon) el).removePoint(lastPoint);
             setLastPoint(null, btnUndo);
-            JOptionPane.showMessageDialog(null, "Last point removed!", "Info", JOptionPane.INFORMATION_MESSAGE);
+            SimpleDialogCreator.showInfoDialog(null, "Last point removed!");
         });
         btnAddPoints.addActionListener(e -> {
             d.setVisible(true);
@@ -158,8 +155,7 @@ public class AddElementDialog extends EditableDialog {
                     runRecordAction();
                 }
                 ((CadPolygon) el).addPoint(lastPoint, false);
-
-                JOptionPane.showMessageDialog(null, "Point added!", "Info", JOptionPane.INFORMATION_MESSAGE);
+                SimpleDialogCreator.showInfoDialog(null, "Point added!");
             });
         });
         JButton btnClose = new JButton("Close");
@@ -181,17 +177,15 @@ public class AddElementDialog extends EditableDialog {
         JTextField fW = new JTextField(10);
         JTextField fH = new JTextField(10);
         addAction = () -> {
-            try {
-                el = new CadRectangle(fX.getText(), fY.getText(), fW.getText(), fH.getText());
-                runRecordAction();
-            } catch(NumberFormatException ex) {
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Invalid input. Please enter valid numbers.",
-                        "Error", JOptionPane.ERROR_MESSAGE
-                );
-                cleanTextFields();
-            }
+            ExceptionManager.tryAndCatch(
+                    this,
+                    () -> {
+                        el = new CadRectangle(fX.getText(), fY.getText(), fW.getText(), fH.getText());
+                        runRecordAction();
+                    },
+                    this::cleanTextFields,
+                    "Invalid input. Please enter valid numbers."
+            );
         };
         fH.addKeyListener(createEnterKeyListener());
         JButton btnAdd = new JButton("Add");
@@ -214,17 +208,15 @@ public class AddElementDialog extends EditableDialog {
         JTextField fW = new JTextField(10);
         JTextField fH = new JTextField(10);
         addAction = () -> {
-            try {
-                el = new CadEllipse(fX.getText(), fY.getText(), fW.getText(), fH.getText());
-                runRecordAction();
-            } catch(NumberFormatException ex) {
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Invalid input. Please enter valid numbers.",
-                        "Error", JOptionPane.ERROR_MESSAGE
-                );
-                cleanTextFields();
-            }
+            ExceptionManager.tryAndCatch(
+                    this,
+                    () -> {
+                        el = new CadEllipse(fX.getText(), fY.getText(), fW.getText(), fH.getText());
+                        runRecordAction();
+                    },
+                    this::cleanTextFields,
+                    "Invalid input. Please enter valid numbers."
+            );
         };
         fH.addKeyListener(createEnterKeyListener());
         JButton btnAdd = new JButton("Add");

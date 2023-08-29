@@ -11,7 +11,6 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.UUID;
 
 public class RecordsManager {
     private static ArrayList<CadElement> list;

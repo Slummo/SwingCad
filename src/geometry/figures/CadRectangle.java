@@ -40,13 +40,6 @@ public class CadRectangle extends Rectangle2D.Double implements CadElement {
         this(p1.x, p1.y, p1.distance(p2), p1.distance(p3));
     }
 
-    private static int[] getValues(CadPoint p1, CadPoint p2, CadPoint p3) {
-        int width = (int) (2 * Math.abs(p2.x - p1.x));
-        int height = (int) (2 * Math.abs(p3.y - p1.y));
-
-        return new int[] {(int) p1.x, (int) p1.y, width, height};
-    }
-
     @Override
     public String getId() {
         return id;

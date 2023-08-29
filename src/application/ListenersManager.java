@@ -10,8 +10,6 @@ import geometry.primitives.CadSegment;
 import gui.dialogs.AddElementDialog;
 import gui.dialogs.SimpleDialogCreator;
 
-import javax.swing.*;
-import java.awt.*;
 import java.awt.event.*;
 
 public class ListenersManager {
